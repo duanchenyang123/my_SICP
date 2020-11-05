@@ -1,0 +1,44 @@
+(define (+rat x y )
+    (make-rat (+ (* (numer x) (denom y))
+                 (* (numer y) (denmo x)))
+              (* (denom x) (denom y))))
+
+(define (make-rat n d)
+    (cons n d))
+(define (numer x) (car x))
+(define (denom x) (cdr x))
+
+
+(define A (make-rat 1 2))
+(define B (make-rat 1 4)
+
+(define ans (+rat A B))
+
+(numer ans)
+
+
+#有理数的最简分数
+ (define (gcd x y)
+    (if (= y 0)
+        x
+        (gcd y (mod x y))))
+
+ (define (mod x y)
+    (if (< x y)
+        x
+        (mod (- x y) y)))
+
+ (define (make-rat n d)
+    (let ((g (gcd n d)))
+      (cons (/ n g) (/ d g))))
+
+
+#另一种有理数构造
+
+(define (make-rat n d) (cons n d))
+(define (numer x)
+    (let ((g (gcd (car x) (cdr x))))
+      (/ (car x) g)))
+(define (denom x)
+    (let ((g (gcd (car x) (cdr x))))
+      (/ (cdr x) g)))

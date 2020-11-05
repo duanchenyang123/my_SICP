@@ -1,0 +1,210 @@
+
+(define (search f neg-point pos-point)
+  (let ((midpoint (average neg-point pos-point)))
+    (if (close-enough? neg-point pos-point)
+        midpoint
+        (let ((test-value (f midpoint)))
+          (cond ((positive? test-value)
+                 (search f neg-point midpoint))
+                ((negative? test-value)
+                 (search f midpoint pos-point))
+                (else midpoint))))))
+
+(define (close-enough? x y) (< (abs (- xx y)) 0.001))
+
+;;;零点存在定理  开始两个点必须一正一负 不好用
+
+(define (half-interval-method f a b) 
+  (let ((a-value (f a))
+        (b-value (f b)))
+    (cond ((and (negative? a-value) (positive? b-value))
+           (search f a b))
+          ((and (negative? b-value) (positive> a-vallue))
+           (search f a b))
+          (else (error "value are noyt of opposite sign" a b)))))
+
+
+;;;不动点 
+
+(define tolerance 0.00001)
+
+(define (fixed-point f first-guess)
+  (define (close-enough? v1 v2)
+    (< (abs (- v1 v2)) tolerance))
+  (define (try guess)
+    (let ((next (f guess)))
+      (if (close-enough? guess next)
+          next
+          (try next))))
+    (try fisrt-guess))
+
+;;;不动点找平方根
+
+(define (sqrt x)
+  (fixed-point (lambda (y) (/ x y)) 1.0))
+  ;;;但是这个不行 不收敛
+
+(define (sqrt x)
+  (fixed-point (lambda (y) (average y (/ x y))) 1.0))
+;;;平均阻尼技术 帮助收敛
+
+;;;1.35
+;;; 黄金分割满足方程 x^2 = x + 1    x = 1 + 1 / x
+
+(define tolerance 0.00001)
+
+(define (fixed-point f first-guess)
+  (define (close-enough? v1 v2)
+    (< (abs (- v1 v2)) tolerance))
+  (define (try guess)
+    (let ((next (f guess)))
+      (if (close-enough? guess next)
+        next
+        (try next))))
+  (try fisrt-guess))
+
+(fixed-point (lambda (x) (+ 1 (/ 1.0 x))) 1.0)
+
+
+;;;1.36
+
+(fixed-point (lambda (x) (/ (log 1000) (log x))) 2.0)
+
+(define (average x y) (/ (+ x y) 2)
+
+(fixed-point (lambda (x) (average x (/ (log 1000) (log x)))) 2.0)
+
+;;;1.37 
+(define (cont-frac n d k)
+  (define (iter index)
+    (if (> index k)
+        0
+        (/ (n index) (+ (d index) (iter (+ index 1))))))
+  (iter 1))
+
+(define (con-frac n d k) 
+  (define (iter index result)
+    (display index)
+    (newline)
+    (if (> 1 index)
+      result
+      (iter (- index 1) (/ (n index)
+                           (+ (d index) result)))))
+  (iter k 0))
+
+(define (average-damp f) lambda (x) (average x (f x)))
+
+(define (cube-root x)
+  (fixed-point (average-damp (lambda (y) (/ x (square y)))) 1.0))
+
+;;;1.38
+
+(define (d i)
+  (cond
+    ((or (= i 1) (= i 2)) i)
+    ((= 0 (remainder (- i 2) 3))
+      (* 2 (+ 1 (/ (- i 2) 3))))
+    (else 1)))
+
+(+ 2
+  (cont-frac (lambda (i) 1.0) d 100)))
+
+
+;;;1.39
+(define (tan-cf x k)
+  (define (n index)
+    (if (= index 1)
+      x
+      (- (* x x))))
+  (define (d index)
+    (- (* 2 index) 1))
+  (cont-frac n d k))
+
+;;;用不动点描述牛顿法  找g 在 x - (g / g')变换下的不动点
+(define (deriv g)
+  (lambda (x) (/ (- (g (+ x dx)) (g x)) dx)))
+
+(define dx 0.00001)
+
+(define (cube x) (* x x x))
+
+(define (newton-transform g)
+  (lambda (x) (- x (/ (g x) ((deriv g) x)))))
+
+(define (newtons-method g guess)
+  (fixed-point (newton-transform g) guess))
+
+;;;传入变换的不动点函数
+(define (fixed-point-of-transform g transform guess)
+  (fixed-point (transform g) guess))
+
+(define (sqrt x)
+  (fixed-point-of-transform (lambda (y) (/ x y))
+                            average-damp
+                            1.0))
+
+;;;1.41
+
+(define (double f) lambda (x) (f (f x)))
+
+(((double (double double)) inc) 5)
+
+;;;1.42
+
+(define (compose f g) lambda (x) (f (g x)))
+
+;;;1.43
+
+(define (repeated f n) 
+  (if (= n 1)
+    f
+    (lambda (x) f ((repeated f (- n 1) x)))))
+
+(define (repeated2 f n) 
+  (if (= n 1)
+    f
+    (compose f (repeated2 f (- n 1)))))
+
+;;;4.44
+(define dx 0.00001)
+
+(define (smooth f) 
+  (lambda (x) 
+    (/ (+ (f x) (f (- x dx) (f (+ x dx)))) 3)))
+
+(define (n-smooth f n) ((repeated smooth n) f))
+
+(define (average-damp f)
+  (lambda (x) (/ (+ x (f x)) 2)))
+
+(define (log2 x) (/ (log x) (log 2)))
+
+(define (nth-root x n)
+ (fixed-point ((repeated average-damp (floor (log2 n)))
+                  (lambda (y) (/ x (expt y (- n 1))))) 1.0))  
+
+(define (exp a n) ((repeat (lambda (x) (* a x)) (- n 1) ) a)) 
+;;;>>>(exp 2 3)
+
+(define (close-enough? v1 v2)
+  (define tolerance 0.0000001)
+  (< (/ (abs (- v1 v2)) v2) tolerance))
+
+
+(define (iterative-improve good-enough? improve)
+  (lambda(x) 
+    (let ((xx (improve x)))
+      (if (good-enough? x xx)
+        x
+        (iterative-improve good-enough? improve) (improve x)))))
+
+
+(define (sqrt y)
+  (define (averange m n) (/ (+ m n) 2))
+  ((iterative-improve close-enough? (lambda (x) (average x (/ y x)))) 1.0))
+
+
+
+
+
+
