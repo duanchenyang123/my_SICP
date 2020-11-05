@@ -1,0 +1,34 @@
+(define (sum term a next b)
+  (if (> a b)
+      0
+      (+ (term a)
+         (sum term (next a) next b))))
+;;;求立方和
+(define (cube x) (* x (* x x)))
+(define (inc n) (+ n 1))
+(define (sum-cubes a b)
+  (sum cube a inc b))
+
+;;;求pi近似值
+(define (pi-next n) (+ n 4))
+(define (pi-term a) (/ 1.0 (* a (+ a 2))))
+(define (sum-pi a b)
+  (sum pi-term a pi-next b ))
+
+;;;求和
+(define (identity x) x)
+(define (sum-integers a b) identity a inc b)
+
+;;;求积分
+(define (integral f a b dx)
+  (define (add-dx x) (+ dx x))
+  (* (sum f (+ a (/ dx 2.0)) add-dx b) dx))
+
+(define (simpson f a b n) 
+    (define (h) (/ (- b a) n))
+    (define (y k) (f (+ a (* k (h)))))
+    (define (sim-term k) 
+        (cond ((or (= k 0) (= k n)) (y k))
+              ((even? k) (* 2 (y k)))
+              (else (* 4 (y k)))))
+    (/ (* (h) (sum sim-term 0 inc n)) 3.0))

@@ -1,0 +1,24 @@
+(define 1-to-4 (list 1 2 3 4))
+(car (cdr (cdr 1-to-4)))
+
+ (define (scale-list s l)
+    (if (null? l)
+        nil
+        (cons (* (car l) s)
+              (scale-list s (cdr l)))))
+
+#或者
+ (define (map p l)
+    (if (null? l)
+        nil
+        (cons (p (car l))
+              (map p (cdr l)))))
+
+(define (scale-list s l) (map lambda(item) (* item s)) l))
+
+ (define (for-each proc list)
+    (cond ((null? list) "done")
+          (else (proc (car list))
+                (for-each proc (cdr list)))))
+#for-each没有返回值 仅仅是做些什么 比如打印 并且是迭代  map会构建新的list
+(define a a)

@@ -1,0 +1,2 @@
+(define dsimp
+	(simplifier deriv-rules))

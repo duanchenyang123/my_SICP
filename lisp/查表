@@ -1,0 +1,10 @@
+(put 'polar 'real-part real-part-polar) ;;;两个引用形象为表格纵列 然后把具体过程放对应格子里去。  用get取出
+
+(define (operate op obj)
+    (let ((proc (get (type obj) op)))
+       (if (not (null? proc))
+       	   (proc (contents obj))
+	   (error undefined op)))
+
+(define (real-part obj)
+  (operate 'real-part obj))

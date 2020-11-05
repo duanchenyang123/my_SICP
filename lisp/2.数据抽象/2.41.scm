@@ -1,0 +1,11 @@
+(define (s-triple n s)
+  (filter
+    (lambda (triple)
+      (let ((a1 (car triple))
+            (a2 (cadr triple))
+            (a3 (caddr triple)))
+      (and (< a3 n)
+           (< a2 a3))))
+    (map (lambda (p) 
+           (append p (list (- s (car p) (cadr p)))))
+      (unique-pairs n))))
